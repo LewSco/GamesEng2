@@ -430,3 +430,6 @@ FodyWeavers.xsd
 
 # Output folder
 /out/*
+
+# SMFL
+/lib/SFML
