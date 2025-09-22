@@ -433,3 +433,6 @@ FodyWeavers.xsd
 
 # SFML library
 /lib/SFML
+
+# Resources 
+/res/*
