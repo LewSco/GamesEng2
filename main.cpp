@@ -1,15 +1,16 @@
 #include <SFML/Graphics.hpp>
 using namespace sf;
 
-const Keyboard::Key controls[4] = 
+// Controls
+const Keyboard::Key _controls[4] = 
 {
-	Keyboard::A,   // Player1 UP
-	Keyboard::Z,   // Player1 Down
+	Keyboard::W,   // Player1 UP
+	Keyboard::S,   // Player1 Down
 	Keyboard::Up,  // Player2 UP
 	Keyboard::Down // Player2 Down
 };
 
-//Parameters
+// Parameters
 const Vector2f _paddleSize(25.f, 100.f);
 const float _ballRadius = 10.f;
 const int _gameWidth = 800;
@@ -23,9 +24,14 @@ const float _initialVelocityX = 100.f; //horizontal velocity
 const float _initialVelocityY = 60.f; //vertical velocity
 const float _velocityMultiplier = 1.1f; //how much the ball will speed up everytime it hits a paddle. Here, 10% every time.
 
-//Objects of the game
+// Objects of the game
 CircleShape _ball;
 RectangleShape _paddles[2];
+
+// Score Params
+Font _font;
+Text _text;
+int _p1Score = 0, _p2Score = 0;
 
 /// <summary>
 /// resets the paddles and ball
@@ -41,6 +47,24 @@ void Reset()
 
 	// reset the ball to the initial velocity
 	_ballVelocity = { (_player1Serving ? _initialVelocityX : -_initialVelocityX), _initialVelocityY };
+
+	// Update Score Text
+	_text.setString(std::to_string(_p1Score) + " : " + std::to_string(_p2Score));
+	// Keep Score Text Centered
+	_text.setPosition((_gameWidth * .5f) - (_text.getLocalBounds().width * .5f), 0);
+}
+
+void MovePaddle(RectangleShape &paddle, Keyboard::Key up, Keyboard::Key down, float deltaTime)
+{
+	// handle paddle movement
+	float direction = 0.0f;
+
+	if (Keyboard::isKeyPressed(up))
+		direction--;
+	if (Keyboard::isKeyPressed(down))
+		direction++;
+
+	paddle.move(Vector2f(0.f, direction * _paddleSpeed * deltaTime));
 }
 
 /// <summary>
@@ -56,28 +80,34 @@ void Init()
 
 	// Set size and origin of ball
 	_ball.setRadius(_ballRadius);
-	_ball.setOrigin(_ballRadius, _ballRadius); //Should be half the ball width and height
+	_ball.setOrigin(_ballRadius, _ballRadius); // Should be half the ball width and height
+
+	// Load font-face from res dir
+	_font.loadFromFile("Debug/res/Fonts/RobotoMono-Regular.ttf");
+	// Set text element to use font
+	_text.setFont(_font);
+	// set the character size to 24 pixels
+	_text.setCharacterSize(24);
 
 	Reset();
+
+
+	
+	
+	
 }
 
 /// <summary>
 /// // Update Everything
 /// </summary>
 /// <param name="dt"> deltaTime or the time between frames </param>
-void Update(float dt) 
+void Update(float deltaTime) 
 {
-	// handle paddle movement
-	float direction = 0.0f;
+	// move paddles
+	MovePaddle(_paddles[0], _controls[0], _controls[1], deltaTime);
+	MovePaddle(_paddles[1], _controls[2], _controls[3], deltaTime);
 
-	if (Keyboard::isKeyPressed(controls[0]))
-		direction--;
-	if (Keyboard::isKeyPressed(controls[1])) 
-		direction++;
-
-	_paddles[0].move(Vector2f(0.f, direction * _paddleSpeed * dt));
-
-	_ball.move(_ballVelocity * dt);
+	_ball.move(_ballVelocity * deltaTime);
 
 	// check ball collision
 	if (_ball.getPosition().y > _gameHeight) // bottom wall
@@ -94,11 +124,17 @@ void Update(float dt)
 	}
 	else if (_ball.getPosition().x > _gameWidth) // right wall 
 	{
-		Reset();
+		_player1Serving = false;
+		_p1Score += 1; // increase score
+
+		Reset(); // reset ball, paddles and score text
 	}
 	else if (_ball.getPosition().x < 0) // left wall
 	{
-		Reset();
+		_player1Serving = true;
+		_p2Score += 1; // increase score
+
+		Reset(); // reset ball, paddles and score text
 	}
 	else if (_ball.getPosition().x < _paddleSize.x + _paddleOffsetWall &&                  // ball is inline or behind paddle AND
 			_ball.getPosition().y > _paddles[0].getPosition().y - (_paddleSize.y * 0.5) &&  // ball is below top edge of paddle AND
@@ -126,11 +162,13 @@ void Render(RenderWindow& window) {
 	window.draw(_paddles[0]);
 	window.draw(_paddles[1]);
 	window.draw(_ball);
+
+	window.draw(_text);
 }
 
 void Clean() 
 {
-	//free up the memory if necessary.
+	// free up the memory if necessary.
 }
 
 int main() 
