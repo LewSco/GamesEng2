@@ -435,4 +435,4 @@ FodyWeavers.xsd
 /lib/SFML
 
 # Resources 
-/res/*
+/res/Fonts/*
