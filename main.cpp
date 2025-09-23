@@ -83,18 +83,13 @@ void Init()
 	_ball.setOrigin(_ballRadius, _ballRadius); // Should be half the ball width and height
 
 	// Load font-face from res dir
-	_font.loadFromFile("Debug/res/Fonts/RobotoMono-Regular.ttf");
+	_font.loadFromFile("res/Fonts/RobotoMono-Regular.ttf");
 	// Set text element to use font
 	_text.setFont(_font);
 	// set the character size to 24 pixels
 	_text.setCharacterSize(24);
 
 	Reset();
-
-
-	
-	
-	
 }
 
 /// <summary>
